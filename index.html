@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f2f2f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Kula Farms">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Kula Farms — Farm Manager</title>
+  <style>
+    :root {
+      --bg: #f2f2f7;
+      --card: #fff;
+      --ink: #000;
+      --mut: #8e8e93;
+      --line: rgba(60, 60, 67, .18);
+      --pri: #007aff;
+      --grn: #34c759;
+      --bad: #ff3b30;
+      --chip: rgba(120, 120, 128, .12);
+      --bar: rgba(249, 249, 249, .85);
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #000;
+        --card: #1c1c1e;
+        --ink: #fff;
+        --line: rgba(84, 84, 88, .6);
+        --pri: #0a84ff;
+        --grn: #30d158;
+        --bad: #ff453a;
+        --bar: rgba(29, 29, 31, .85);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #000;
+      --card: #1c1c1e;
+      --ink: #fff;
+      --line: rgba(84, 84, 88, .6);
+      --pri: #0a84ff;
+      --grn: #30d158;
+      --bad: #ff453a;
+      --bar: rgba(29, 29, 31, .85);
+    }
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px);
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.35 -apple-system, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+      -webkit-text-size-adjust: 100%;
+    }
+    .tbar {
+      position: sticky;
+      top: env(safe-area-inset-top, 0px);
+      z-index: 10;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      background: var(--bar);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: .5px solid transparent;
+      transition: border-color .2s;
+    }
+    .tbar.sc {
+      border-color: var(--line);
+    }
+    .st {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 600;
+      font-size: 17px;
+      opacity: 0;
+      transition: .2s;
+      pointer-events: none;
+      max-width: 50%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .tbar.sc .st {
+      opacity: 1;
+    }
+    .nb {
+      border: 0;
+      background: none;
+      color: var(--pri);
+      font: 17px inherit;
+      cursor: pointer;
+      padding: 6px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+    }
+    .plus {
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      border-radius: 50%;
+      background: var(--pri);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      justify-content: center;
+      padding: 0 0 2px;
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 16px 110px;
+    }
+    .lt {
+      font-size: 34px;
+      font-weight: 700;
+      margin: 2px 4px 14px;
+      letter-spacing: .3px;
+    }
+    h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      color: var(--mut);
+      margin: 20px 16px 6px;
+      font-weight: 400;
+    }
+    .mut {
+      color: var(--mut);
+    }
+    .good {
+      color: var(--grn);
+    }
+    .bad {
+      color: var(--bad);
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .grp {
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      width: 100%;
+      border: 0;
+      border-bottom: .5px solid var(--line);
+      background: none;
+      text-align: left;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+    .item:last-child {
+      border-bottom: 0;
+    }
+    .item:active {
+      background: var(--chip);
+    }
+    .av {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--chip);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex: none;
+    }
+    .item .t {
+      flex: 1;
+      min-width: 0;
+    }
+    .item .t b {
+      display: block;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item .t small {
+      color: var(--mut);
+      font-size: 13px;
+    }
+    .item .a {
+      text-align: right;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .item .a.mut {
+      font-weight: 400;
+      font-size: 20px;
+    }
+    .chip {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 9px;
+      background: var(--chip);
+      color: var(--mut);
+    }
+    .chip.p {
+      background: rgba(0, 122, 255, .15);
+      color: var(--pri);
+    }
+    .chip.s {
+      background: rgba(52, 199, 89, .18);
+      color: var(--grn);
+    }
+    .chip.u {
+      background: rgba(255, 149, 0, .18);
+      color: #ff9500;
+    }
+    .hero {
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 12px;
+      color: #fff;
+      background: linear-gradient(135deg, #0a84ff, #5e5ce6);
+    }
+    .hero.g {
+      background: linear-gradient(135deg, #30b350, #34c759);
+    }
+    .hero small {
+      opacity: .85;
+      font-size: 13px;
+    }
+    .hero .big {
+      font-size: 34px;
+      font-weight: 700;
+      margin: 2px 0 10px;
+      font-variant-numeric: tabular-nums;
+    }
+    .pg {
+      height: 6px;
+      background: rgba(255, 255, 255, .3);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .pg i {
+      display: block;
+      height: 100%;
+      background: #fff;
+      border-radius: 6px;
+    }
+    .hero .row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-top: 8px;
+      opacity: .95;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .kpi {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .kpi span {
+      display: block;
+      font-size: 12px;
+      color: var(--mut);
+      margin-bottom: 2px;
+    }
+    .kpi b {
+      font-size: 18px;
+      font-variant-numeric: tabular-nums;
+    }
+    .bigv {
+      font-size: 30px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .note {
+      background: rgba(255, 204, 0, .2);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .seg {
+      display: flex;
+      background: var(--chip);
+      border-radius: 9px;
+      padding: 2px;
+      margin-bottom: 14px;
+    }
+    .seg button {
+      flex: 1;
+      border: 0;
+      background: none;
+      color: var(--ink);
+      font: 600 13px inherit;
+      padding: 6px 4px;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .seg button.on {
+      background: var(--card);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+    }
+    .chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 0 0 12px;
+      scrollbar-width: none;
+    }
+    .chips::-webkit-scrollbar {
+      display: none;
+    }
+    .chips button {
+      flex: none;
+      border: 0;
+      background: var(--chip);
+      color: var(--ink);
+      padding: 6px 14px;
+      border-radius: 16px;
+      font: 500 13px inherit;
+      cursor: pointer;
+    }
+    .chips button.on {
+      background: var(--pri);
+      color: #fff;
+    }
+    .sum {
+      display: flex;
+      justify-content: space-between;
+      color: var(--mut);
+      font-size: 13px;
+      margin: 0 4px 8px;
+    }
+    .empty {
+      text-align: center;
+      color: var(--mut);
+      padding: 28px 10px;
+    }
+    .cb,
+    .hr {
+      margin-bottom: 12px;
+    }
+    .cl,
+    .hl {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+    .ct,
+    .tr {
+      height: 7px;
+      background: var(--chip);
+      border-radius: 7px;
+      overflow: hidden;
+      margin-top: 3px;
+    }
+    .ct i,
+    .tr i {
+      display: block;
+      height: 100%;
+      border-radius: 7px;
+      background: var(--pri);
+    }
+    .leg {
+      display: flex;
+      gap: 14px;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .btns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .btns .btn {
+      padding: 10px 4px;
+      font-size: 14px;
+    }
+    nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      background: var(--bar);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-top: .5px solid var(--line);
+      display: flex;
+      padding: 6px 0 calc(4px + env(safe-area-inset-bottom, 0px));
+    }
+    nav button {
+      flex: 1;
+      border: 0;
+      background: none;
+      color: var(--mut);
+      font: 500 10px inherit;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    nav button.on {
+      color: var(--pri);
+    }
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font: 600 16px inherit;
+      cursor: pointer;
+      background: var(--pri);
+      color: #fff;
+    }
+    .btn.g {
+      background: var(--chip);
+      color: var(--pri);
+    }
+    .btn.w {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .ov {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .4);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 50;
+    }
+    .ov.on {
+      display: flex;
+    }
+    .sheet {
+      width: 100%;
+      max-width: 560px;
+      max-height: 94%;
+      overflow: auto;
+      background: var(--bg);
+      border-radius: 14px 14px 0 0;
+      padding: 6px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+      animation: up .3s cubic-bezier(.2, .8, .2, 1);
+    }
+    @keyframes up {
+      from {
+        transform: translateY(100%);
+      }
+    }
+    @media (min-width: 700px) {
+      .ov {
+        align-items: center;
+      }
+      .sheet {
+        border-radius: 14px;
+      }
+    }
+    .grab {
+      width: 36px;
+      height: 5px;
+      border-radius: 3px;
+      background: var(--line);
+      margin: 4px auto 6px;
+    }
+    .sh-h {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      margin: 4px 0 14px;
+    }
+    .sh-h b {
+      font-size: 17px;
+    }
+    .tb {
+      border: 0;
+      background: none;
+      color: var(--pri);
+      font: 17px inherit;
+      cursor: pointer;
+      padding: 6px 0;
+      justify-self: start;
+    }
+    .tb.b {
+      font-weight: 600;
+    }
+    .frm {
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .fr {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      border-bottom: .5px solid var(--line);
+      min-height: 46px;
+    }
+    .fr:last-child {
+      border-bottom: 0;
+    }
+    .fr label {
+      flex: none;
+      width: 40%;
+      font-size: 16px;
+    }
+    .fr input,
+    .fr select {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      background: none;
+      text-align: right;
+      font: 16px inherit;
+      color: var(--ink);
+      padding: 12px 0;
+      outline: 0;
+      text-align-last: right;
+    }
+    .fr select {
+      color: var(--pri);
+    }
+    textarea {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--ink);
+      padding: 12px;
+      font: 12px inherit;
+    }
+    .dr {
+      width: 100%;
+      border: 0;
+      background: var(--card);
+      color: var(--bad);
+      font: 17px inherit;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(40, 40, 42, .92);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 14px;
+      opacity: 0;
+      transition: .25s;
+      z-index: 60;
+      pointer-events: none;
+    }
+    .toast.on {
+      opacity: 1;
+      transform: translateX(-50%);
+    }
+    ol {
+      padding-left: 18px;
+      margin: 0;
+      line-height: 1.7;
+    }
+    .av {
+      color: var(--pri);
+    }
+    .av svg {
+      display: block;
+    }
+    .fr.ic {
+      flex-wrap: wrap;
+      padding-top: 6px;
+    }
+    .fr.ic label {
+      width: 100%;
+      padding-top: 10px;
+    }
+    .ip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 6px 0 12px;
+      width: 100%;
+    }
+    .ib {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 0;
+      background: var(--chip);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .ib.on {
+      background: var(--pri);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="tbar" id="tl"></div>
+  <main id="view"></main>
+  <nav id="nav"></nav>
+  <div class="ov" id="ov"><div class="sheet" id="sh"></div></div>
+  <div class="toast" id="toast"></div>
+  <script>
+    // --- Core data & constants ---
+    const KEY = "kulaFarmsData_v4", CATS = ["Seed / Stock", "Feed & Fertilizer", "Vet & Medicine", "Labour", "Transport", "Utilities", "Equipment", "Supplies", "Other"];
+    const n = v => Number(v) || 0, $ = id => document.getElementById(id), clone = o => JSON.parse(JSON.stringify(o));
+    const K = v => "K " + n(v).toLocaleString("en-ZM", { maximumFractionDigits: 2 });
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const sum = (a, k) => a.reduce((x, y) => x + n(y[k]), 0), uid = () => "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+
+    // --- Seed data (legacy conversion helper) ---
+    const OLD = {
+      capital: [
+        { date: "", description: "Initial/other farm funding — enter amount", type: "Investment", amount: 10000, source: "Pocket", notes: "Enter only money you personally put into the farm." },
+        { date: "", description: "Money taken from farm for yourself", type: "Withdrawal", amount: 0, source: "Owner Withdrawal", notes: "This is when invested capital is actually returned to you." }
+      ],
+      sales: [
+        { batch: "Batch 1", customer: "Eng. Tindisa", qty: 5, price: 150, received: 750, outstanding: 0 },
+        { batch: "Batch 1", customer: "Mr. Phiri", qty: 2, price: 140, received: 280, outstanding: 0 },
+        { batch: "Batch 1", customer: "Eng. Zulu", qty: 2, price: 150, received: 300, outstanding: 0 },
+        { batch: "Batch 1", customer: "Sis. Victoria", qty: 2, price: 150, received: 0, outstanding: 300, notes: "Unpaid" },
+        { batch: "Batch 1", customer: "Mrs. Pst Emmanuel", qty: 10, price: 150, received: 1500, outstanding: 0 },
+        { batch: "Batch 1", customer: "Home", qty: 1, price: 140, received: 140, outstanding: 0, notes: "Home consumption" },
+        { batch: "Batch 1", customer: "Home", qty: 2, price: 150, received: 300, outstanding: 0, notes: "Home consumption" }
+      ],
+      expenses: [
+        { batch: "Batch 1", item: "Chicks", qty: 100, amount: 1750 },
+        { batch: "Batch 1", item: "Transport", qty: 1, amount: 100 },
+        { batch: "Batch 1", item: "Stress Pack", qty: 3, amount: 90 },
+        { batch: "Batch 1", item: "Pre Starter Feed", qty: 1, amount: 627 },
+        { batch: "Batch 1", item: "Vaccine (Full)", qty: 1, amount: 84 },
+        { batch: "Batch 1", item: "Electricity", qty: 1, amount: 300 },
+        { batch: "Batch 1", item: "Rice Husk", qty: 1, amount: 80 },
+        { batch: "Batch 1", item: "Grower Feed", qty: 1, amount: 527 },
+        { batch: "Batch 1", item: "Grower Feed", qty: 1, amount: 527 },
+        { batch: "Batch 1", item: "Finisher Feed", qty: 1, amount: 509 },
+        { batch: "Batch 1", item: "Rice Husk", qty: 2, amount: 160 },
+        { batch: "Batch 1", item: "Finisher Feed", qty: 1, amount: 552 },
+        { batch: "Batch 1", item: "Finisher Feed", qty: 1, amount: 552 },
+        { batch: "Batch 1", item: "Gaga", qty: 1, amount: 200 },
+        { batch: "Batch 2", item: "Chicks", qty: 100, amount: 1750 },
+        { batch: "Batch 2", item: "Transport", qty: 1, amount: 120 },
+        { batch: "Batch 2", item: "PreStarter Feed", qty: 1, amount: 588 },
+        { batch: "Batch 2", item: "Starter", qty: 1, amount: 568 },
+        { batch: "Batch 2", item: "Gumboro Vaccine", qty: 1, amount: 40 },
+        { batch: "Batch 2", item: "Booster", qty: 1, amount: 60 },
+        { batch: "Batch 2", item: "Booster", qty: 4, amount: 88 },
+        { batch: "Batch 2", item: "Vaccine (Full)", qty: 1, amount: 300 },
+        { batch: "Batch 2", item: "Grower Feed", qty: 1, amount: 568 },
+        { batch: "Batch 2", item: "Grower Feed", qty: 1, amount: 495, funding: "Farm Sales" },
+        { batch: "Batch 2", item: "Finisher Feed", qty: 1, amount: 495, funding: "Farm Sales" },
+        { batch: "Batch 3", item: "Chicks", qty: 100, amount: 1850, funding: "Farm Sales" },
+        { batch: "Batch 3", item: "Starter Feed", qty: 1, amount: 525, funding: "Farm Sales" },
+        { batch: "Batch 3", item: "Rice Husk", qty: 1, amount: 70, funding: "Farm Sales" }
+      ]
+    };
+
+    function convertLegacy(o) {
+      const cat = i => /chick/i.test(i) ? CATS[0] : /starter|grower|finisher|feed/i.test(i) ? CATS[1] : /vacc|booster|stress|gumboro/i.test(i) ? CATS[2] : /transport/i.test(i) ? CATS[4] : /electric/i.test(i) ? CATS[5] : /husk/i.test(i) ? CATS[7] : CATS[8];
+      const names = [...new Set([...o.expenses, ...o.sales].map(x => x.batch).filter(Boolean))];
+      const cycles = names.map((b, i) => ({ id: "c" + i, produceId: "p1", name: b, status: "Active", start: "", units: n((o.expenses.find(e => e.batch == b && /chick/i.test(e.item)) || {}).qty), notes: "" }));
+      const cid = b => (cycles.find(c => c.name == b) || {}).id || "";
+      return {
+        produce: [{ id: "p1", name: "Broilers", icon: "🐔", unit: "birds" }],
+        cycles: cycles,
+        expenses: o.expenses.map(e => ({ date: e.date || "", produceId: "p1", cycleId: cid(e.batch), item: e.item, category: cat(e.item), qty: n(e.qty), amount: n(e.amount), funding: e.funding || "To classify", notes: e.notes || "" })),
+        sales: o.sales.map(s => ({ date: s.date || "", produceId: "p1", cycleId: cid(s.batch), customer: s.customer, qty: n(s.qty), price: n(s.price), received: n(s.received), outstanding: n(s.outstanding), notes: s.notes || "" })),
+        capital: o.capital || []
+      };
+    }
+
+    // --- State ---
+    let st = load();
+
+    function load() {
+      try {
+        const r = localStorage.getItem(KEY);
+        if (r) return JSON.parse(r);
+        const v2 = localStorage.getItem("kulaFarmsData_v2");
+        if (v2) return convertLegacy({ ...clone(OLD), ...JSON.parse(v2) });
+      } catch (e) { }
+      return convertLegacy(clone(OLD));
+    }
+
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { }
+    }
+
+    // --- Helpers ---
+    const P = id => st.produce.find(p => p.id == id), C = id => st.cycles.find(c => c.id == id);
+    const PICK = ["bird", "cow", "pig", "fish", "egg", "wheat", "sprout", "leaf", "apple", "drop"];
+    function fixIcons() {
+      st.stock = st.stock || [];
+      st.produce.forEach(p => { if (!PICK.includes(p.icon)) p.icon = p.icon == "🐔" ? "bird" : "sprout" });
+    }
+    fixIcons();
+
+    const today = () => new Date().toISOString().slice(0, 10);
+    const IC = {
+      home: '<path d="M3 11l9-8 9 8M5 9.5V20h14V9.5"/>',
+      produce: '<path d="M5 19c0-9 5-14 15-14 0 10-5 15-14 15M5 19l8-8"/>',
+      money: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',
+      reports: '<path d="M5 20V11M12 20V4M19 20v-6"/>',
+      more: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>'
+    };
+    const svg = k => `<svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>`;
+
+    Object.assign(IC, {
+      leaf: IC.produce,
+      sprout: '<path d="M12 21v-8M12 13c0-4-3-6-7-6 0 4 3 6 7 6zM12 13c0-3 2-5 6-5 0 3-2 5-6 5z"/>',
+      wheat: '<path d="M12 21V8M12 8c-2-1-3-3-3-5 2 1 3 3 3 5zM12 8c2-1 3-3 3-5-2 1-3 3-3 5zM12 14c-2-1-3-3-3-5M12 14c2-1 3-3 3-5"/>',
+      apple: '<path d="M12 8c-3-2-7 0-7 5s3 8 5 8c1 0 1-.5 2-.5s1 .5 2 .5c2 0 5-3 5-8s-4-7-7-5zM12 8c0-2 1-4 3-5"/>',
+      drop: '<path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/>',
+      egg: '<path d="M12 3c4 0 7 6 7 11a7 7 0 0 1-14 0c0-5 3-11 7-11z"/>',
+      bird: '<path d="M5 16c0-4 3-7 7-7h2l3-4v5c2 1 3 3 3 5 0 4-4 6-8 6s-7-2-7-5z"/><circle cx="15" cy="10.5" r=".6"/>',
+      fish: '<path d="M3 12c3-5 9-6 13-2l5-3v10l-5-3c-4 4-10 3-13-2z"/><circle cx="8" cy="11" r=".6"/>',
+      cow: '<path d="M6 8L3 5M18 8l3-3M6 8h12l1 6c0 4-3 7-7 7s-7-3-7-7z"/><path d="M9 12v1M15 12v1M9.5 17h5"/>',
+      pig: '<path d="M5 9L4 5l4 2M19 9l1-4-4 2M5 9c2-2 12-2 14 0 1 5 0 11-7 11S4 14 5 9z"/><ellipse cx="12" cy="15" rx="3" ry="2"/>',
+      user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>',
+      users: '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c1-4 3-6 7-6s6 2 7 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .8 3.5 2.8 4 6"/>',
+      box: '<path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"/>',
+      book: '<path d="M4 4h6a3 3 0 0 1 2 1 3 3 0 0 1 2-1h6v15h-6a3 3 0 0 0-2 1 3 3 0 0 0-2-1H4zM12 5v15"/>',
+      save: '<path d="M12 3v12M8 7l4-4 4 4M5 14v6h14v-6"/>',
+      trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+      in: '<path d="M12 3v13M7 11l5 5 5-5M5 21h14"/>',
+      out: '<path d="M12 21V8M7 13l5-5 5 5M5 3h14"/>',
+      cycle: '<path d="M20 12a8 8 0 0 1-14 5M4 12a8 8 0 0 1 14-5M18 3v4h-4M6 21v-4h4"/>',
+      check: '<path d="M5 12l5 5 9-10"/>',
+      phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>'
+    });
+    const gi = (k, s = 20) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k] || IC.sprout}</svg>`;
+
+    function pickIcon(k, b) {
+      $("f_icon").value = k;
+      b.parentNode.querySelectorAll(".ib").forEach(x => x.classList.toggle("on", x == b));
+    }
+
+    // --- Calculations ---
+    function tot(f) {
+      const m = x => (f.p === undefined || x.produceId == f.p) && (f.c === undefined || x.cycleId == f.c);
+      const ex = st.expenses.filter(m), sa = st.sales.filter(m);
+      const exp = sum(ex, "amount"), rec = sum(sa, "received"), out = sum(sa, "outstanding"), rev = rec + out;
+      return { ex, sa, exp, rec, out, rev, profit: rev - exp, margin: rev ? (rev - exp) / rev : 0 };
+    }
+    const cap = () => ({ inv: sum(st.capital.filter(r => r.type == "Investment"), "amount"), wd: sum(st.capital.filter(r => r.type == "Withdrawal"), "amount") });
+    const pc = v => (v * 100).toFixed(0) + "%", cl = v => v >= 0 ? "good" : "bad";
+    const low = () => st.stock.filter(x => n(x.min) > 0 && n(x.qty) <= n(x.min));
+
+    function bars(ex) {
+      const m = {};
+      ex.forEach(e => { const c = e.category || "Other"; m[c] = (m[c] || 0) + n(e.amount) });
+      const t = Object.values(m).reduce((a, b) => a + b, 0);
+      return Object.entries(m).sort((a, b) => b[1] - a[1]).map(([c, v]) => `<div class="cb"><div class="cl"><span>${esc(c)}</span><b>${K(v)} · ${pc(t ? v / t : 0)}</b></div><div class="ct"><i style="width:${t ? v / t * 100 : 0}%"></i></div></div>`).join("") || '<div class="empty">No expenses yet</div>';
+    }
+
+    function groups(by, p) {
+      const pid = p == "All" ? undefined : (st.produce.find(x => x.name == p) || {}).id, m = {}, pn = x => (P(x.produceId) || { name: "Farm-wide" }).name;
+      const key = x => by == "month" ? ((x.date || "").slice(0, 7) || "No date") : by == "cycle" ? pn(x) + " · " + ((C(x.cycleId) || {}).name || "no cycle") : pn(x);
+      const add = (x, k, v) => { if (pid !== undefined && x.produceId != pid) return; const g = m[key(x)] = m[key(x)] || { rev: 0, exp: 0 }; g[k] += v };
+      st.sales.forEach(s => add(s, "rev", n(s.received) + n(s.outstanding)));
+      st.expenses.forEach(e => add(e, "exp", n(e.amount)));
+      return Object.entries(m).sort((a, b) => by == "month" ? (a[0] == "No date" ? 1 : b[0] == "No date" ? -1 : a[0].localeCompare(b[0])) : (b[1].rev - b[1].exp) - (a[1].rev - a[1].exp));
+    }
+    const lab = k => /^\d{4}-\d\d$/.test(k) ? new Date(k + "-15").toLocaleString("en", { month: "short", year: "numeric" }) : k;
+    function custs() {
+      const m = {};
+      st.sales.forEach(s => {
+        const c = (s.customer || "(unnamed)").trim(), g = m[c] = m[c] || { name: c, owed: 0, bought: 0, n: 0 };
+        g.owed += n(s.outstanding); g.bought += n(s.received) + n(s.outstanding); g.n++;
+      });
+      return Object.values(m).sort((a, b) => b.owed - a.owed || b.bought - a.bought);
+    }
+
+    // --- Form schemas ---
+    const NUM = ["amount", "qty", "price", "received", "outstanding", "units", "min", "cost"];
+    const SCH = {
+      produce: { name: "produce", f: [["name", "Name", "text"], ["icon", "Icon", "I"], ["unit", "Unit (birds, kg…)", "text"]], blank: () => ({ name: "", icon: "sprout", unit: "units" }) },
+      cycles: { name: "cycle", f: [["produceId", "Produce", "P"], ["name", "Cycle name", "text"], ["status", "Status", ["Active", "Closed"]], ["start", "Start date", "date"], ["units", "Units started", "number"], ["notes", "Notes", "text"]], blank: () => ({ produceId: "", name: "", status: "Active", start: today(), units: 0, notes: "" }) },
+      expenses: { name: "expense", f: [["date", "Date", "date"], ["produceId", "Produce", "PF"], ["cycleId", "Cycle", "C"], ["item", "Item", "text"], ["category", "Category", CATS], ["funding", "Funding", ["To classify", "Pocket", "Farm Sales"]], ["qty", "Qty", "number"], ["amount", "Amount (K)", "number"], ["notes", "Notes", "text"]], blank: () => ({ date: today(), produceId: st.produce[0]?.id || "", cycleId: "", item: "", category: CATS[1], funding: "To classify", qty: 1, amount: 0, notes: "" }) },
+      sales: { name: "sale", f: [["date", "Date", "date"], ["produceId", "Produce", "P"], ["cycleId", "Cycle", "C"], ["customer", "Customer", "text"], ["qty", "Qty", "number"], ["price", "Price (K)", "number"], ["received", "Received (K)", "number"], ["outstanding", "Outstanding (K)", "number"], ["notes", "Notes", "text"]], blank: () => ({ date: today(), produceId: st.produce[0]?.id || "", cycleId: "", customer: "", qty: 0, price: 0, received: 0, outstanding: 0, notes: "" }) },
+      capital: { name: "capital entry", f: [["date", "Date", "date"], ["description", "Description", "text"], ["type", "Type", ["Investment", "Withdrawal"]], ["amount", "Amount (K)", "number"], ["source", "Source", ["Pocket", "Owner Withdrawal"]], ["notes", "Notes", "text"]], blank: () => ({ date: today(), description: "", type: "Investment", amount: 0, source: "Pocket", notes: "" }) },
+      stock: { name: "stock item", f: [["name", "Item", "text"], ["unit", "Unit", "text"], ["qty", "On hand", "number"], ["min", "Low-stock level", "number"], ["cost", "Unit cost (K)", "number"], ["notes", "Notes", "text"]], blank: () => ({ name: "", unit: "bags", qty: 0, min: 0, cost: 0, notes: "" }) }
+    };
+
+    // --- Navigation & Views ---
+    const TABS = [["home", "Home"], ["produce", "Produce"], ["money", "Money"], ["reports", "Reports"], ["more", "More"]];
+    const BACK = { pd: ["produce", "Produce"], customers: ["more", "More"], stock: ["more", "More"], guide: ["more", "More"] };
+    const TITLE = { home: "Kula Farms", produce: "Produce", money: "Money", reports: "Reports", more: "More", customers: "Customers", stock: "Stock", guide: "How it works" };
+    let tab = "home", sub = "expenses", cur = "", cn = "", cf = "Owing", flt = { sales: "All", expenses: "All" }, rp = { by: "month", p: "All" };
+
+    function go(t, s) { tab = t; if (s) sub = s; window.scrollTo(0, 0); render(); }
+    function openP(id) { cur = id; go("pd"); }
+    const addKind = () => tab == "produce" ? "produce" : tab == "money" ? sub : tab == "stock" ? "stock" : null;
+    const VIEWS = { home, produce: () => list("produce"), pd: pdetail, money, reports, more, customers, stock: () => list("stock"), guide };
+
+    function render() {
+      const act = BACK[tab] ? BACK[tab][0] : tab, title = tab == "pd" ? (P(cur) || { name: "Produce" }).name : TITLE[tab], ak = addKind();
+      $("nav").innerHTML = TABS.map(t => `<button class="${t[0] == act ? "on" : ""}" onclick="go('${t[0]}')">${svg(t[0])}${t[1]}</button>`).join("");
+      $("tl").innerHTML = (BACK[tab] ? `<button class="nb" onclick="go('${BACK[tab][0]}')">‹ ${BACK[tab][1]}</button>` : `<span></span>`) + `<span class="st">${esc(title)}</span>` + (ak ? `<button class="nb plus" onclick="openForm('${ak}',-1)" aria-label="Add">+</button>` : `<span></span>`);
+      $("view").innerHTML = `<h1 class="lt">${esc(title)}</h1>` + VIEWS[tab]();
+      onScroll();
+    }
+    const onScroll = () => $("tl").classList.toggle("sc", window.scrollY > 40);
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    // --- View: Home ---
+    function home() {
+      const a = tot({}), k = cap(), oh = tot({ p: "" }).exp,
+        fs = sum(st.expenses.filter(e => e.funding == "Farm Sales"), "amount"),
+        fp = sum(st.expenses.filter(e => e.funding == "Pocket"), "amount"),
+        pct = k.inv ? Math.min(100, k.wd / k.inv * 100) : 0,
+        sv = st.stock.reduce((x, s) => x + n(s.qty) * n(s.cost), 0);
+      const cells = [
+        ["Cash received", K(a.rec)], ["Customers owe", K(a.out), "customers"], ["Total expenses", K(a.exp)],
+        ["Farm-wide overhead", K(oh)], ["Paid from pocket", K(fp)], ["Farm cash unspent", K(a.rec - fs)],
+        ["Stock value", K(sv), "stock"], ["Low-stock items", low().length, "stock"]
+      ];
+      let h = `<div class="hero g"><small>Whole-farm profit</small><div class="big">${K(a.profit)}</div><div class="row"><span>Revenue ${K(a.rev)}</span><span>Expenses ${K(a.exp)}</span><span>Margin ${pc(a.margin)}</span></div></div>`;
+      h += `<div class="hero"><small>Owner capital still at risk</small><div class="big">${K(k.inv - k.wd)}</div><div class="pg"><i style="width:${pct}%"></i></div><div class="row"><span>Invested ${K(k.inv)}</span><span>${pct.toFixed(0)}% recovered</span></div></div>`;
+      h += `<div class="grid" style="margin-top:16px">${cells.map(c => `<div class="kpi" ${c[2] ? `onclick="go('${c[2]}')" style="cursor:pointer"` : ""}><span>${c[0]}${c[2] ? " ›" : ""}</span><b>${c[1]}</b></div>`).join("")}</div><h2>Produce performance</h2>`;
+      h += `<div class="grp">` + (st.produce.map(p => {
+        const t = tot({ p: p.id }), ac = st.cycles.filter(c => c.produceId == p.id && c.status == "Active").length;
+        return `<button class="item" onclick="openP('${p.id}')"><div class="av">${gi(p.icon)}</div><div class="t"><b>${esc(p.name)}</b><small>${ac} active · Rev ${K(t.rev)} · Exp ${K(t.exp)}</small></div><div class="a ${cl(t.profit)}">${K(t.profit)}<div><span class="chip">${pc(t.margin)}</span></div></div></button>`
+      }).join("") || `<div class="empty">Add your first produce in the Produce tab.</div>`) + `</div>`;
+      return h + `<h2>Where the money goes</h2><div class="card">${bars(a.ex)}</div><div class="note">Sales used to fund another cycle are not personal profit. They stay farm money until withdrawn to you.</div>`;
+    }
+
+    // --- View: Produce detail ---
+    function pdetail() {
+      const p = P(cur); if (!p) { tab = "produce"; return list("produce"); }
+      const t = tot({ p: cur }), cs = st.cycles.filter(c => c.produceId == cur), u = sum(cs, "units"), cpu = u ? t.exp / u : 0;
+      let h = `<div class="hero g"><small>${esc(p.name)} profit</small><div class="big">${K(t.profit)}</div><div class="row"><span>Revenue ${K(t.rev)}</span><span>Expenses ${K(t.exp)}</span><span>Margin ${pc(t.margin)}</span></div></div>`;
+      h += `<div class="btns"><button class="btn" onclick="openForm('expenses',-1,{produceId:'${cur}'})">+ Expense</button><button class="btn" onclick="openForm('sales',-1,{produceId:'${cur}'})">+ Sale</button><button class="btn g" onclick="openForm('cycles',-1,{produceId:'${cur}',name:'Cycle ${cs.length + 1}'})">+ Cycle</button></div>`;
+      h += `<div class="grid"><div class="kpi"><span>Cash received</span><b>${K(t.rec)}</b></div><div class="kpi"><span>Outstanding</span><b>${K(t.out)}</b></div><div class="kpi"><span>Units started</span><b>${u.toLocaleString()} ${esc(p.unit)}</b></div><div class="kpi"><span>Cost per unit</span><b>${u ? K(cpu) : "—"}</b></div></div>`;
+      h += `<h2>Expenses by category</h2><div class="card">${bars(t.ex)}</div><h2>Cycles</h2><div class="grp">` + (cs.map(c => {
+        const x = tot({ p: cur, c: c.id });
+        return `<button class="item" onclick="openForm('cycles',${st.cycles.indexOf(c)})"><div class="av" style="color:${c.status == "Active" ? "var(--grn)" : "var(--mut)"}">${gi("cycle")}</div><div class="t"><b>${esc(c.name)}</b><small>Rev ${K(x.rev)} · Exp ${K(x.exp)}${c.units ? " · " + K(x.exp / c.units) + "/" + esc(p.unit) : ""}</small></div><div class="a ${cl(x.profit)}">${K(x.profit)}<div><span class="chip">${c.status}</span></div></div></button>`
+      }).join("") || `<div class="empty">No cycles yet — tap + Cycle.</div>`) + `</div>`;
+      return h + `<button class="dr" style="color:var(--pri)" onclick="openForm('produce',${st.produce.indexOf(p)})">Edit / delete ${esc(p.name)}</button>`;
+    }
+
+    // --- View: Money (tabs) ---
+    function money() {
+      return `<div class="seg">${["expenses", "sales", "capital"].map(s => `<button class="${s == sub ? "on" : ""}" onclick="go('money','${s}')">${s[0].toUpperCase() + s.slice(1)}</button>`).join("")}</div>` + list(sub);
+    }
+
+    // --- Generic list renderer ---
+    function list(kind) {
+      let rows = st[kind].map((r, i) => ({ r, i })), h = "";
+      if (kind == "expenses" || kind == "sales") {
+        const opts = ["All", ...st.produce.map(p => p.name), ...(kind == "expenses" ? ["Farm-wide", "To classify"] : [])], f = flt[kind];
+        h += `<div class="chips">${opts.map(o => `<button class="${f == o ? "on" : ""}" onclick="flt['${kind}']=this.textContent;render()">${esc(o)}</button>`).join("")}</div>`;
+        if (f != "All") rows = rows.filter(({ r }) => f == "Farm-wide" ? !r.produceId : f == "To classify" ? r.funding == f : (P(r.produceId) || {}).name == f);
+      }
+      if (kind != "produce" && kind != "stock") rows.sort((a, b) => (b.r.date || "").localeCompare(a.r.date || ""));
+      const rr = rows.map(x => x.r), kk = cap();
+      h += `<div class="sum"><span>${rows.length} entries</span><span>${kind == "sales" ? `Received ${K(sum(rr, "received"))} · Owed ${K(sum(rr, "outstanding"))}` : kind == "expenses" ? `Total ${K(sum(rr, "amount"))}` : kind == "capital" ? `In ${K(kk.inv)} · Out ${K(kk.wd)}` : kind == "stock" ? `Value ${K(rr.reduce((x, s) => x + n(s.qty) * n(s.cost), 0))}` : ""}</span></div>`;
+      if (kind == "expenses") h += `<button class="btn g w" onclick="bulk()">Mark all “To classify” as Farm Sales</button>`;
+      h += `<div class="grp">` + (rows.map(({ r, i }) => {
+        const p = P(r.produceId) || { icon: "home", name: "Farm-wide" }, cy = (C(r.cycleId) || {}).name || "no cycle", d = r.date ? " · " + r.date : "";
+        let ic = p.icon, t, s, a, c = "", oc = `openForm('${kind}',${i})`;
+        if (kind == "produce") { const x = tot({ p: r.id }); ic = r.icon; t = r.name; s = `${st.cycles.filter(c => c.produceId == r.id).length} cycles · Exp ${K(x.exp)}`; a = `<span class="${cl(x.profit)}">${K(x.profit)}</span>`; oc = `openP('${r.id}')`; }
+        if (kind == "capital") { ic = r.type == "Withdrawal" ? "out" : "in"; t = r.description || "(no description)"; s = `${r.type} · ${r.source}${d}`; a = K(r.amount); }
+        if (kind == "sales") { t = r.customer || "(no customer)"; s = `${p.name} · ${cy} · ${r.qty} × K${r.price}${d}`; a = K(r.received); if (n(r.outstanding)) c = `<div><span class="chip u">Owes ${K(r.outstanding)}</span></div>`; }
+        if (kind == "expenses") { t = r.item || "(no item)"; s = `${p.name} · ${cy} · ${r.category || "Other"}${d}`; a = K(r.amount); c = `<div><span class="chip ${r.funding == "Pocket" ? "p" : r.funding == "Farm Sales" ? "s" : "u"}">${r.funding}</span></div>`; }
+        if (kind == "stock") { ic = "box"; t = r.name; s = `${K(r.cost)} per ${r.unit}`; a = `${n(r.qty)} ${esc(r.unit)}`; if (n(r.min) > 0 && n(r.qty) <= n(r.min)) c = `<div><span class="chip u">Low</span></div>`; }
+        return `<button class="item" onclick="${oc}"><div class="av">${gi(ic)}</div><div class="t"><b>${esc(t)}</b><small>${esc(s)}</small></div><div class="a">${a}${c}</div></button>`
+      }).join("") || `<div class="empty">Nothing here yet.<br>Tap + to add one.</div>`) + `</div>`;
+      return h;
+    }
+
+    // --- View: Reports ---
+    function reports() {
+      const g = groups(rp.by, rp.p), mx = Math.max(1, ...g.flatMap(([, v]) => [v.rev, v.exp])), R = g.reduce((a, x) => a + x[1].rev, 0), X = g.reduce((a, x) => a + x[1].exp, 0), k = cap();
+      const gm = groups("month", "All").filter(x => x[0] != "No date"), ap = gm.length ? gm.reduce((a, [, v]) => a + v.rev - v.exp, 0) / gm.length : 0, risk = k.inv - k.wd, und = st.sales.concat(st.expenses).filter(x => !x.date).length;
+      let h = `<div class="seg">${[["month", "Month"], ["cycle", "Cycle"], ["produce", "Produce"]].map(([v, l]) => `<button class="${rp.by == v ? "on" : ""}" onclick="rp.by='${v}';render()">${l}</button>`).join("")}</div>`;
+      h += `<div class="chips">${["All", ...st.produce.map(p => p.name)].map(o => `<button class="${rp.p == o ? "on" : ""}" onclick="rp.p=this.textContent;render()">${esc(o)}</button>`).join("")}</div>`;
+      h += `<div class="grid"><div class="kpi"><span>Revenue</span><b>${K(R)}</b></div><div class="kpi"><span>Expenses</span><b>${K(X)}</b></div></div><div class="card"><span class="mut">Profit</span><div class="bigv ${cl(R - X)}">${K(R - X)}</div></div>`;
+      h += `<h2>Profit by ${rp.by}</h2><div class="card">` + (g.map(([q, v]) => `<div class="hr"><div class="hl"><b>${esc(lab(q))}</b><span class="${cl(v.rev - v.exp)}">${K(v.rev - v.exp)}</span></div><div class="tr"><i style="width:${v.rev / mx * 100}%;background:var(--grn)"></i></div><div class="tr"><i style="width:${v.exp / mx * 100}%;background:var(--bad)"></i></div></div>`).join("") || '<div class="empty">No data yet</div>') + `<div class="leg"><span style="color:var(--grn)">● Revenue</span><span style="color:var(--bad)">● Expenses</span></div></div>`;
+      h += `<h2>Payback</h2><div class="card"><div class="bigv">${risk <= 0 ? "Recovered" : K(risk)}</div><div class="mut">${risk <= 0 ? "You have taken back all you invested." : ap > 0 ? `still at risk · about ${Math.ceil(risk / ap)} months at your average profit of ${K(ap)}/month` : "still at risk · add dated entries to estimate payback time"}</div></div>`;
+      return h + (und ? `<div class="note">${und} entries have no date, so they show under “No date”. Open them and set a date to see them by month.</div>` : "");
+    }
+
+    // --- View: Customers ---
+    function customers() {
+      const all = custs(), rows = all.map((c, i) => ({ c, i })).filter(x => cf == "All" || x.c.owed > 0);
+      return `<div class="card"><span class="mut">Total owed to you</span><div class="bigv">${K(sum(all, "owed"))}</div></div><div class="seg">${["Owing", "All"].map(v => `<button class="${cf == v ? "on" : ""}" onclick="cf='${v}';render()">${v}</button>`).join("")}</div><div class="grp">` + (rows.map(({ c, i }) => `<button class="item" onclick="cn=custs()[${i}].name;showCust()"><div class="av">${gi(c.name == "Home" ? "home" : "user")}</div><div class="t"><b>${esc(c.name)}</b><small>${c.n} sale${c.n > 1 ? "s" : ""} · bought ${K(c.bought)}</small></div><div class="a">${c.owed > 0 ? `<span class="chip u">${K(c.owed)}</span>` : `<span class="good">${gi("check", 18)}</span>`}</div></button>`).join("") || `<div class="empty">Nobody owes you anything</div>`) + `</div>`;
+    }
+
+    // --- View: More ---
+    function more() {
+      const r = (ic, bg, t, s, o, x = "") => `<button class="item" onclick="${o}"><div class="av" style="background:${bg};color:#fff">${ic}</div><div class="t"><b style="${x}">${t}</b><small>${s}</small></div><div class="a mut">›</div></button>`;
+      return `<div class="grp">${r(gi("users"), "#ff9500", "Customers", "Who owes you · send reminders", "go('customers')")}${r(gi("box"), "#af52de", "Stock", "Feed, vaccines, seed · low-stock alerts", "go('stock')")}</div><div class="grp">${r(gi("book"), "#007aff", "How it works", "A quick guide", "go('guide')")}${standalone() ? "" : r(gi("phone"), "#5856d6", "Install app", "Add Kula Farms to your home screen", "installApp()")}${r(gi("save"), "#34c759", "Backup & restore", "Copy or paste your data", "backup()")}${r(gi("trash"), "#ff3b30", "Reset all data", "Restore the starting values", "askReset()", "color:var(--bad)")}</div>`;
+    }
+
+    // --- View: Guide ---
+    function guide() {
+      const s = [
+        "Add each crop or livestock in Produce, then create cycles (batches or seasons) under it.",
+        "Record expenses and sales in Money. Pick the produce, cycle and category; choose Farm-wide for shared costs.",
+        "Customers lists who still owes you. Tap one to mark sales paid or send a WhatsApp reminder.",
+        "Stock tracks feed, vaccines and seed. Set a low-stock level to see warnings on Home.",
+        "Reports show profit by month, cycle or produce, and an estimate of your payback time. Keep dates filled in.",
+        "Profit = received + outstanding sales − expenses. Sales used to fund the next cycle are reinvestment, not personal profit."
+      ];
+      return `<div class="card"><ol>${s.map(x => `<li>${x}</li>`).join("")}</ol></div>`;
+    }
+
+    // --- Popup sheets & form handling ---
+    const sheet = h => { $("sh").innerHTML = `<div class="grab"></div>` + h; $("ov").classList.add("on"); };
+    const closeSheet = () => $("ov").classList.remove("on");
+    const hdr = (t, l, r) => `<div class="sh-h"><button class="tb" onclick="closeSheet()">${l}</button><b>${t}</b><span style="justify-self:end">${r}</span></div>`;
+    $("ov").addEventListener("click", e => { if (e.target.id == "ov") closeSheet(); });
+    document.addEventListener("keydown", e => { if (e.key == "Escape") closeSheet(); });
+
+    const cyOpts = (pid, cur) => `<option value="">— none —</option>` + st.cycles.filter(c => c.produceId == pid).map(c => `<option value="${c.id}" ${c.id == cur ? "selected" : ""}>${esc(c.name)}</option>`).join("");
+    function fillC() { const e = $("f_cycleId"); if (e) e.innerHTML = cyOpts($("f_produceId").value, ""); }
+
+    function field(f, v, r) {
+      const [k, l, t] = f; let inp;
+      if (t == "P" || t == "PF") {
+        const o = (t == "PF" ? [["", "Farm-wide"]] : []).concat(st.produce.map(p => [p.id, p.icon + " " + p.name]));
+        inp = `<select id="f_${k}" onchange="fillC()">${o.map(x => `<option value="${x[0]}" ${x[0] == v ? "selected" : ""}>${esc(x[1])}</option>`).join("")}</select>`;
+      }
+      else if (t == "I") return `<div class="fr ic"><label>${l}</label><input id="f_${k}" type="hidden" value="${esc(v)}"><div class="ip">${PICK.map(q => `<button type="button" class="ib ${q == v ? "on" : ""}" onclick="pickIcon('${q}',this)">${gi(q, 22)}</button>`).join("")}</div></div>`;
+      else if (t == "C") inp = `<select id="f_${k}">${cyOpts(r.produceId, v)}</select>`;
+      else if (Array.isArray(t)) inp = `<select id="f_${k}">${t.map(o => `<option ${o == v ? "selected" : ""}>${o}</option>`).join("")}</select>`;
+      else inp = `<input id="f_${k}" type="${t}" ${t == "number" ? 'step="0.01" inputmode="decimal" onfocus="this.select()"' : ""} value="${esc(v)}">`;
+      return `<div class="fr"><label for="f_${k}">${l}</label>${inp}</div>`;
+    }
+
+    function openForm(kind, i, pre) {
+      if ((kind == "sales" || kind == "cycles") && !st.produce.length) return toast("Add a produce type first");
+      const sc = SCH[kind], r = i < 0 ? { ...sc.blank(), ...pre } : st[kind][i];
+      const adj = kind == "stock" && i >= 0 ? `<div class="frm"><div class="fr"><label>Add / use</label><input id="adj" type="number" inputmode="decimal" placeholder="amount"></div><div class="fr" style="gap:8px;padding:8px 14px"><button class="btn g" style="flex:1" onclick="adjStock(${i},-1)">Use</button><button class="btn" style="flex:1" onclick="adjStock(${i},1)">Add</button></div></div>` : "";
+      sheet(hdr((i < 0 ? "New " : "Edit ") + sc.name, "Cancel", `<button class="tb b" onclick="saveForm('${kind}',${i})">Save</button>`) + adj + `<div class="frm">${sc.f.map(f => field(f, r[f[0]], r)).join("")}</div>` + (i >= 0 ? `<button class="dr" id="delb" onclick="delRow('${kind}',${i})">Delete</button>` : ""));
+    }
+
+    function saveForm(kind, i) {
+      const o = {};
+      SCH[kind].f.forEach(f => { const v = $("f_" + f[0]).value; o[f[0]] = NUM.includes(f[0]) ? n(v) : v.trim(); });
+      if (["produce", "cycles", "stock"].includes(kind) && !o.name) return toast("Please enter a name");
+      if ((kind == "sales" || kind == "cycles") && !o.produceId) return toast("Choose a produce");
+      if (i < 0) { if (kind == "produce" || kind == "cycles") o.id = uid(); st[kind].push(o); }
+      else st[kind][i] = { ...st[kind][i], ...o };
+      save(); closeSheet(); render(); toast(i < 0 ? "Added" : "Saved");
+    }
+
+    function delRow(kind, i) {
+      const b = $("delb");
+      if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = kind == "produce" ? "Tap again: deletes all its data" : "Tap again to confirm"; return; }
+      const r = st[kind][i];
+      if (kind == "produce") { ["cycles", "expenses", "sales"].forEach(k => st[k] = st[k].filter(x => x.produceId != r.id)); tab = "produce"; }
+      if (kind == "cycles") ["expenses", "sales"].forEach(k => st[k].forEach(x => { if (x.cycleId == r.id) x.cycleId = ""; }));
+      st[kind] = st[kind].filter(x => x !== r);
+      save(); closeSheet(); render(); toast("Deleted");
+    }
+
+    function adjStock(i, sg) {
+      const v = n($("adj").value); if (!v) return toast("Enter an amount");
+      st.stock[i].qty = n(st.stock[i].qty) + sg * v;
+      save(); closeSheet(); render(); toast(sg > 0 ? "Stock added" : "Stock used");
+    }
+
+    // --- Customer sheet ---
+    function showCust() {
+      const c = custs().find(x => x.name == cn) || { owed: 0, bought: 0 };
+      const un = st.sales.map((s, i) => ({ s, i })).filter(x => (x.s.customer || "(unnamed)").trim() == cn && n(x.s.outstanding) > 0);
+      const msg = encodeURIComponent(`Hello ${cn}, a friendly reminder from Kula Farms: you have an outstanding balance of ${K(c.owed)}. Thank you!`);
+      sheet(hdr(esc(cn), "Close", "") + `<div class="card"><span class="mut">Total owed</span><div class="bigv">${K(c.owed)}</div><span class="mut">Total purchases ${K(c.bought)}</span></div>` + (un.length ? `<div class="grp">${un.map(({ s, i }) => `<div class="item" style="cursor:default"><div class="t"><b>${K(s.outstanding)}</b><small>${esc((P(s.produceId) || { name: "Farm" }).name)} · ${s.qty} × K${s.price}${s.date ? " · " + s.date : ""}</small></div><button class="btn g" onclick="payOne(${i})">Paid</button></div>`).join("")}</div><button class="btn w" onclick="payAll()">Mark all paid</button><a class="btn g w" style="display:block;text-align:center;text-decoration:none" href="https://wa.me/?text=${msg}" target="_blank" rel="noopener">Send WhatsApp reminder</a>` : `<div class="empty">All settled</div>`));
+    }
+    function pay(s) { s.received = n(s.received) + n(s.outstanding); s.outstanding = 0; }
+    function payOne(i) { pay(st.sales[i]); save(); showCust(); render(); toast("Marked paid"); }
+    function payAll() { st.sales.forEach(s => { if ((s.customer || "(unnamed)").trim() == cn) pay(s); }); save(); showCust(); render(); toast("All marked paid"); }
+
+    // --- Bulk classify ---
+    function bulk() {
+      const c = st.expenses.filter(r => r.funding == "To classify").length;
+      if (!c) return toast("Nothing to classify");
+      sheet(hdr("Bulk classify", "Cancel", "") + `<div class="card">Set ${c} expense${c > 1 ? "s" : ""} marked “To classify” to <b>Farm Sales</b>?</div><button class="btn w" onclick="st.expenses.forEach(r=>{if(r.funding=='To classify')r.funding='Farm Sales'});save();closeSheet();render();toast('Classified')">Confirm</button>`);
+    }
+
+    // --- Backup & Reset ---
+    function backup() {
+      sheet(hdr("Backup / restore", "Close", "") + `<textarea id="bk" rows="9">${esc(JSON.stringify(st))}</textarea><div style="display:flex;gap:8px;margin-top:12px"><button class="btn g" style="flex:1" onclick="$('bk').select();try{document.execCommand('copy');toast('Copied')}catch(e){toast('Select and copy manually')}">Copy</button><button class="btn" style="flex:1" onclick="restore()">Restore</button></div>`);
+    }
+    function restore() {
+      try { const d = JSON.parse($("bk").value); if (!Array.isArray(d.produce) || !Array.isArray(d.expenses)) throw 0; st = { capital: [], sales: [], cycles: [], stock: [], ...d }; fixIcons(); save(); closeSheet(); go("home"); toast("Restored"); }
+      catch (e) { toast("That doesn't look like a valid backup"); }
+    }
+    function askReset() {
+      sheet(hdr("Reset all data?", "Cancel", "") + `<div class="card">This erases everything on this device and restores the original starting values.</div><button class="dr" onclick="st=convertLegacy(clone(OLD));fixIcons();save();closeSheet();go('home');toast('Reset done')">Reset everything</button>`);
+    }
+
+    // --- Toast & Install ---
+    let tt; function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("on"), 1800); }
+    let dp; const standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+    addEventListener("beforeinstallprompt", e => { e.preventDefault(); dp = e; if (tab == "more") render(); });
+    function installApp() {
+      if (dp) { dp.prompt(); dp.userChoice.finally(() => { dp = null; render(); }); return; }
+      sheet(hdr("Install Kula Farms", "Close", "") + `<div class="card"><b>iPhone / iPad</b><ol><li>Open this page in Safari.</li><li>Tap the Share button.</li><li>Choose “Add to Home Screen”.</li></ol></div><div class="card"><b>Android</b><ol><li>Open the browser menu (⋮).</li><li>Tap “Install app” or “Add to Home screen”.</li></ol></div>`);
+    }
+
+    // --- PWA dynamic manifest (inline, works offline) ---
+    (function () {
+      try {
+        const c = document.createElement("canvas"); c.width = c.height = 180; const x = c.getContext("2d");
+        x.fillStyle = "#34c759"; x.fillRect(0, 0, 180, 180); x.fillStyle = "#fff"; x.font = "700 92px -apple-system,Helvetica,Arial,sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("KF", 90, 96);
+        const u = c.toDataURL("image/png"), l = document.createElement("link"); l.rel = "apple-touch-icon"; l.href = u; document.head.appendChild(l);
+        const m = { name: "Kula Farms", short_name: "Kula Farms", start_url: location.href, display: "standalone", background_color: "#f2f2f7", theme_color: "#f2f2f7", icons: [{ src: u, sizes: "180x180", type: "image/png" }] };
+        const k = document.createElement("link"); k.rel = "manifest"; k.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: "application/manifest+json" })); document.head.appendChild(k);
+      } catch (e) { }
+    })();
+
+    // --- Start ---
+    render();
+  </script>
+</body>
+</html>
